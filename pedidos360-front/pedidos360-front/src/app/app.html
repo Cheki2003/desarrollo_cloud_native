@@ -1,0 +1,76 @@
+<div class="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans">
+  <aside class="w-full md:w-64 bg-white text-slate-800 flex flex-col border-r border-slate-200 shadow-sm">
+    <div class="p-6 text-2xl font-bold tracking-wider text-slate-800 flex items-center gap-2">
+      <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+      Pedidos 360
+    </div>
+    <nav class="flex-1 px-4 mt-4"><a href="#" class="block px-4 py-3 bg-blue-50 text-blue-600 rounded-lg font-medium border-l-4 border-blue-600">Dashboard de Pedidos</a></nav>
+    <div class="p-4 border-t border-slate-200">
+      @if (!autenticado) {
+        <button (click)="login()" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">Iniciar Sesion</button>
+      } @else {
+        <div class="text-sm text-slate-500 mb-3 text-center">Hola, {{ usuario }}</div>
+        <button (click)="logout()" class="w-full py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-lg font-medium transition-colors border border-slate-300 shadow-sm">Cerrar Sesion</button>
+      }
+    </div>
+  </aside>
+
+  <main class="flex-1 p-6 md:p-10 max-h-screen overflow-y-auto">
+    <header class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
+      <div><h1 class="text-3xl font-bold text-slate-800">Gestion de Pedidos</h1><p class="text-slate-500 mt-1">Consulta, crea y actualiza pedidos registrados.</p></div>
+      @if (autenticado) {
+        <div class="flex flex-wrap gap-2">
+          <button (click)="consultarPedidos()" class="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-medium rounded-lg shadow-sm hover:bg-slate-50 transition-colors flex items-center gap-2">
+            <span class="text-blue-500">&#8635;</span>{{ datosConsultados ? 'Refrescar Datos' : 'Mostrar Datos' }}
+          </button>
+          <button (click)="abrirCrearPedido()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors"><span class="text-xl leading-none">+</span> Nuevo pedido</button>
+        </div>
+      }
+    </header>
+
+    @if (!autenticado) {
+      <div class="mt-20 flex flex-col items-center justify-center text-center p-10 bg-white rounded-lg shadow-sm border border-slate-200 max-w-2xl mx-auto">
+        <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6"><svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a4 4 0 00-8 0v4h8z" /></svg></div>
+        <h2 class="text-2xl font-bold text-slate-800 mb-2">Acceso Restringido</h2><p class="text-slate-500 mb-8 max-w-md">Inicia sesion con tu cuenta corporativa para gestionar los pedidos.</p>
+        <button (click)="login()" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm">Iniciar Sesion</button>
+      </div>
+    } @else {
+      @if (mensaje) { <div class="mb-5 px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg">{{ mensaje }}</div> }
+      @if (errorPedidos) { <div class="mb-5 px-4 py-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-lg"><p class="font-semibold">No fue posible completar la operacion</p><p>{{ errorPedidos }}</p></div> }
+
+      @if (mostrarFormulario) {
+        <section class="mb-6 bg-white border border-slate-200 rounded-lg shadow-sm">
+          <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between"><h2 class="font-semibold text-slate-800">{{ modoFormulario === 'crear' ? 'Nuevo pedido' : 'Editar pedido #' + formulario.id }}</h2><button (click)="cancelarFormulario()" class="text-slate-500 hover:text-slate-800 text-xl" title="Cerrar formulario">&times;</button></div>
+          <form (ngSubmit)="guardarPedido()" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="text-sm font-medium text-slate-700">Producto<input [(ngModel)]="formulario.producto" name="producto" required class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md" /></label>
+            <label class="text-sm font-medium text-slate-700">Cantidad<input [(ngModel)]="formulario.cantidad" name="cantidad" type="number" min="1" required class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md" /></label>
+            <label class="text-sm font-medium text-slate-700">Precio<input [(ngModel)]="formulario.precio" name="precio" type="number" min="0" step="0.01" required class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md" /></label>
+            <label class="text-sm font-medium text-slate-700">Estado<select [(ngModel)]="formulario.estado" name="estado" required class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md bg-white"><option value="RECIBIDO">Recibido</option><option value="PREPARANDO">Preparando</option><option value="EN_CAMINO">En camino</option><option value="ENTREGADO">Entregado</option><option value="CANCELADO">Cancelado</option></select></label>
+            <label class="md:col-span-2 text-sm font-medium text-slate-700">Direccion<input [(ngModel)]="formulario.direccion" name="direccion" required class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md" /></label>
+            <div class="md:col-span-2 flex justify-end gap-3 pt-2"><button type="button" (click)="cancelarFormulario()" class="px-4 py-2 border border-slate-300 rounded-md text-slate-700 hover:bg-slate-50">Cancelar</button><button type="submit" [disabled]="guardandoPedido" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-60">{{ guardandoPedido ? 'Guardando...' : (modoFormulario === 'crear' ? 'Crear pedido' : 'Guardar cambios') }}</button></div>
+          </form>
+        </section>
+      }
+
+      <section class="mb-6 bg-white border border-slate-200 rounded-lg shadow-sm p-4"><div class="flex flex-col sm:flex-row sm:items-end gap-3"><label class="flex-1 text-sm font-medium text-slate-700">Filtrar por estado<select [(ngModel)]="estadoFiltro" name="estadoFiltro" class="mt-1 w-full px-3 py-2 border border-slate-300 rounded-md bg-white"><option value="">Todos los estados</option><option value="RECIBIDO">Recibido</option><option value="PREPARANDO">Preparando</option><option value="EN_CAMINO">En camino</option><option value="ENTREGADO">Entregado</option><option value="CANCELADO">Cancelado</option></select></label><button (click)="buscarPedidos()" class="px-4 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700">Buscar</button><button (click)="limpiarFiltro()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50">Limpiar</button></div></section>
+
+      @if (!datosConsultados && !cargandoPedidos) { <section class="py-16 text-center bg-white border border-slate-200 rounded-lg shadow-sm"><h2 class="text-xl font-semibold text-slate-800">Pedidos listos para consultar</h2><p class="mt-2 text-slate-500">Usa "Mostrar Datos" para listar todos los pedidos.</p></section> }
+      @if (cargandoPedidos) { <section class="py-12 text-center bg-white border border-slate-200 rounded-lg shadow-sm text-slate-500"><svg class="animate-spin h-8 w-8 text-blue-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" /><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Cargando pedidos desde la nube...</section> }
+
+      @if (datosConsultados && !cargandoPedidos) {
+        <div [class]="detallePedido ? 'grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]' : 'grid gap-6'">
+          <section class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+            @if (pedidos.length > 0) {
+              <div class="overflow-x-auto"><table class="w-full text-left border-collapse"><thead><tr class="bg-slate-50 text-slate-500 text-sm uppercase tracking-wider border-b border-slate-200"><th class="px-5 py-4 font-semibold">ID</th><th class="px-5 py-4 font-semibold">Producto</th><th class="px-5 py-4 font-semibold">Cantidad</th><th class="px-5 py-4 font-semibold">Total ($)</th><th class="px-5 py-4 font-semibold">Estado</th><th class="px-5 py-4 font-semibold text-right">Acciones</th></tr></thead><tbody class="divide-y divide-slate-100 text-slate-700">
+                @for (pedido of pedidos; track pedido.id) { <tr class="hover:bg-slate-50/50"><td class="px-5 py-4 font-medium text-slate-900">#{{ pedido.id }}</td><td class="px-5 py-4"><div class="font-medium text-slate-800">{{ pedido.producto }}</div><div class="text-xs text-slate-400 mt-1">{{ pedido.direccion }}</div></td><td class="px-5 py-4">{{ pedido.cantidad }} und.</td><td class="px-5 py-4 font-semibold text-slate-800">${{ pedido.precio }}</td><td class="px-5 py-4"><span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">{{ pedido.estado.replace('_', ' ') }}</span></td><td class="px-5 py-4"><div class="flex justify-end gap-1"><button (click)="verDetalle(pedido.id!)" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md" title="Ver detalle">Ver</button><button (click)="abrirEditarPedido(pedido)" class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-md" title="Editar">Editar</button><button (click)="eliminar(pedido.id!)" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md" title="Eliminar">Eliminar</button></div></td></tr> }
+              </tbody></table></div>
+            } @else { <div class="p-10 text-center text-slate-500">No hay pedidos que coincidan con la consulta.</div> }
+          </section>
+          @if (detallePedido) {
+            <aside class="bg-white border border-slate-200 rounded-lg shadow-sm p-5 h-fit"><div class="flex justify-between items-center mb-4"><h2 class="font-semibold text-slate-800">Detalle del pedido</h2><button (click)="detallePedido = null" class="text-slate-400 hover:text-slate-700 text-xl" title="Cerrar detalle">&times;</button></div><dl class="space-y-4 text-sm"><div><dt class="text-slate-500">ID</dt><dd class="font-medium text-slate-800">#{{ detallePedido.id }}</dd></div><div><dt class="text-slate-500">Producto</dt><dd class="font-medium text-slate-800">{{ detallePedido.producto }}</dd></div><div><dt class="text-slate-500">Cantidad</dt><dd>{{ detallePedido.cantidad }} unidades</dd></div><div><dt class="text-slate-500">Precio</dt><dd>${{ detallePedido.precio }}</dd></div><div><dt class="text-slate-500">Estado</dt><dd>{{ detallePedido.estado.replace('_', ' ') }}</dd></div><div><dt class="text-slate-500">Direccion</dt><dd>{{ detallePedido.direccion }}</dd></div></dl><button (click)="abrirEditarPedido(detallePedido)" class="mt-5 w-full px-4 py-2 border border-blue-200 text-blue-700 rounded-md hover:bg-blue-50">Editar pedido</button></aside>
+          }
+        </div>
+      }
+    }
+  </main>
+</div>
