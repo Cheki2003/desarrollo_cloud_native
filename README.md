@@ -43,7 +43,7 @@ sudo kill -9 $(sudo lsof -t -i:8080
 
 | Componente | Configuración Implementada |
 |---|---|
-| **Rutas API Gateway** | `GET /api/pedidos` integrando al backend EC2 en puerto 8080. |
+| **Rutas API Gateway** | `CRUD /api/pedidos` o sea GET, DELETE, PUT y POST integrando al backend EC2 en puerto 8080. |
 | **CORS** | Configurado para permitir origen `http://localhost:4200` y cabeceras `Authorization`. |
 | **Tenant IDaaS** | User Pool `us-east-1_XqYEyzU4Y` registrado en la región `us-east-1`. |
 | **App Client** | Client ID `4go4kv0bh96di7cfcm9d3abhoo` habilitado con PKCE. |
