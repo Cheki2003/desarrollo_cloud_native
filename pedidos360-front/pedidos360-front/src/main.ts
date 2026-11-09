@@ -18,12 +18,8 @@ Amplify.configure({
             'pedidos360-api/pedidos-api-read',
             'pedidos360-api/pedidos-api-write'
           ],
-          redirectSignIn: [
-            'http://localhost:4200/'
-          ],
-          redirectSignOut: [
-            'http://localhost:4200/'
-          ],
+          redirectSignIn: [`${window.location.origin}/`],
+          redirectSignOut: [`${window.location.origin}/`],
           responseType: 'code'
         }
       }

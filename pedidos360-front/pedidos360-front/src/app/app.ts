@@ -23,6 +23,8 @@ export class App implements OnInit {
   usuario = '';
   token = '';
   autenticado = false;
+  iniciandoSesion = false;
+  errorInicioSesion = '';
   pedidos: any[] = [];
   cargandoPedidos = false;
   errorPedidos = '';
@@ -57,10 +59,14 @@ export class App implements OnInit {
   }
 
   async login() {
+    this.iniciandoSesion = true;
+    this.errorInicioSesion = '';
+
     try {
       // Cognito throws UserAlreadyAuthenticatedException if it is redirected twice.
       await getCurrentUser();
       await this.verSesion();
+      this.iniciandoSesion = false;
       return;
     } catch {
       // There is no local session, so redirect to Cognito Hosted UI.
@@ -68,8 +74,15 @@ export class App implements OnInit {
 
     try {
       await signInWithRedirect();
-    } catch (err) {
-      console.error('Error al redirigir al login:', err);
+    } catch (error) {
+      console.error('Error al redirigir al login:', error);
+      this.ngZone.run(() => {
+        this.errorInicioSesion = error instanceof Error
+          ? error.message
+          : 'No fue posible iniciar sesión. Revisa la configuración de Cognito.';
+        this.iniciandoSesion = false;
+        this.actualizarVista();
+      });
     }
   }
 
