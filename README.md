@@ -13,12 +13,36 @@ https://qftpn0meq9.execute-api.us-east-1.amazonaws.com/api/pedidos
 
 
 ---
-## comandos ec2
+## comandos para levantar localmente
 
+### Backend (Spring Boot)
+
+```bash
+cd pedidos360/pedidos360-backend
+chmod +x mvnw
+./mvnw spring-boot:run
+```
+
+La API queda disponible en: http://localhost:8080
+
+### Frontend (Angular)
+
+```bash
+cd pedidos360/pedidos360-front/pedidos360-front
+npm install
+npm start -- --host 0.0.0.0 --port 4200
+```
+
+La app queda disponible en: http://localhost:4200
+
+### Comandos EC2
+
+```bash
 nohup java -Dspring.security.oauth2.resourceserver.jwt.issuer-uri=https://cognito-idp.us-east-1.amazonaws.com/us-east-1_XqYEyzU4Y -jar app.jar > app.log 2>&1 &
 tail -f app.log
 
-sudo kill -9 $(sudo lsof -t -i:8080
+sudo kill -9 $(sudo lsof -t -i:8080)
+```
 
 ---
 
